@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Loader } from '.';
 import * as WinesService from '../services/Wines';
 import { LikeButton, CommentButton, CommentList, CommentModal } from '.';
+import { fetchCurrentWine } from '../actions';
+import { connect } from 'react-redux';
 
 export class Wine extends Component {
   render() {
@@ -49,7 +51,7 @@ export class Wine extends Component {
   }
 }
 
-export class WinePage extends Component {
+export class _WinePage extends Component {
   static contextTypes = {
     router: PropTypes.object,
   };
@@ -62,14 +64,7 @@ export class WinePage extends Component {
 
   componentDidMount() {
     const id = this.props.params.wineId;
-    this.setState({ loading: true }, () => {
-      WinesService.fetchWine(id).then(wine => {
-        this.setState({
-          loading: false,
-          selectedWine: wine,
-        });
-      });
-    });
+    this.props.dispatch(fetchCurrentWine(id));
   }
 
   closeCommentModal = () => {
@@ -81,7 +76,8 @@ export class WinePage extends Component {
   };
 
   render() {
-    if (this.state.loading) {
+    console.log('current??', this.props.currentWine);
+    if (this.props.loading || !this.props.currentWine || !this.props.currentWine.name) {
       return (
         <div className="center-align">
           <Loader />
@@ -92,11 +88,11 @@ export class WinePage extends Component {
       <div>
         <Wine
           host={WinesService.host}
-          wine={this.state.selectedWine}
+          wine={this.props.currentWine}
           openCommentModal={this.openCommentModal}
         />
         <CommentModal
-          wine={this.state.selectedWine}
+          wine={this.props.currentWine}
           isOpen={this.state.commentModalOpen}
           closeCommentModal={this.closeCommentModal}
         />
@@ -104,3 +100,12 @@ export class WinePage extends Component {
     );
   }
 }
+function mapFromStoreToProps(store) {
+  console.log('from',store.currentWine.wine);
+  return {
+    currentWine: store.currentWine ? store.currentWine.wine : null,
+    loading: store.loading === 'HTTP_LOADING',
+  };
+}
+
+export const WinePage = connect(mapFromStoreToProps)(_WinePage);

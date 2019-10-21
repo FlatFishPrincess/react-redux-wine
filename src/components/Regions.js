@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as WinesService from '../services/Wines';
 import { Loader } from '.';
-
+import { connect } from 'react-redux';
+import { fetchRegions } from '../actions/index';
 export class Regions extends Component {
   onSelectRegion = (e, region) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ export class Regions extends Component {
   }
 }
 
-export class RegionsPage extends Component {
+export class _RegionsPage extends Component {
   static contextTypes = {
     router: PropTypes.object,
   };
@@ -42,14 +43,7 @@ export class RegionsPage extends Component {
   };
 
   componentDidMount() {
-    this.setState({ loading: true }, () => {
-      WinesService.fetchRegions().then(regions => {
-        this.setState({
-          loading: false,
-          regions,
-        });
-      });
-    });
+    this.props.dispatch(fetchRegions());
   }
 
   onSelectRegion = region => {
@@ -61,7 +55,8 @@ export class RegionsPage extends Component {
   };
 
   render() {
-    if (this.state.loading) {
+    console.log(this.props);
+    if (this.props.loading) {
       return (
         <div className="center-align">
           <Loader />
@@ -69,7 +64,16 @@ export class RegionsPage extends Component {
       );
     }
     return (
-      <Regions onSelectRegion={this.onSelectRegion} regions={this.state.regions} region={{}} />
+      <Regions onSelectRegion={this.onSelectRegion} regions={this.props.regions} region={{}} />
     );
   }
 }
+
+function mapFromStoreToProps(store) {
+  return {
+    regions: store.regions,
+    loading: store.loading === 'HTTP_LOADING',
+  };
+}
+
+export const RegionsPage = connect(mapFromStoreToProps)(_RegionsPage);

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Comment, Loader } from '.';
 import * as WinesService from '../services/Wines';
-
 export class CommentList extends Component {
   state = {
     loading: false,
